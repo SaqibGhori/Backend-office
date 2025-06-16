@@ -32,7 +32,7 @@ const Reading = mongoose.model('Reading', readingSchema);
 const server = http.createServer(app);
 const io     = new Server(server,{
   cors:{
-    origin:"*",
+    origin:"https://office-app-2g3w.vercel.app/",
     methods:["GET","POST"]
   }
 });
