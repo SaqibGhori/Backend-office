@@ -21,54 +21,33 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // 2) Define Reading model
 const readingSchema = new mongoose.Schema({
- voltageLN:{
-  v1:Number,
-  v2:Number,
-  v3:Number
-
- },
- voltageLL : {
-  V12:Number,
-  V23:Number,
-  v31:Number
- },
- current : {
-  i1:Number,
-  i2:Number,
-   i3:Number
- },
- frequency : {
-  f1:Number,
-  V2:Number,
-  f3:Number
- },
-  frequency : {
-  f1:Number,
-  V2:Number,
-  f3:Number
- },
- activePower:{
-  PL1:Number,
-  PL2:Number,
-  PL3:Number,
- },
- reactivePower:{
-  QL1:Number,
-  QL2:Number,
-  QL3:Number,
- },
- ApparentPower:{
-  SL1:Number,
-  SL2:Number,
-  SL3:Number,
- },
- cos:{
-  CosL1:Number,
-  CosL2:Number,
-  CosL3:Number,
- },
+  voltageLN: {
+    v1: Number, v2: Number, v3: Number
+  },
+  voltageLL: {
+    v12: Number, v23: Number, v31: Number
+  },
+  current: {
+    i1: Number, i2: Number, i3: Number
+  },
+  frequency: {
+    f1: Number, f2: Number, f3: Number
+  },
+  activePower: {
+    pl1: Number, pl2: Number, pl3: Number
+  },
+  reactivePower: {
+    ql1: Number, ql2: Number, ql3: Number
+  },
+  apparentPower: {
+    sl1: Number, sl2: Number, sl3: Number
+  },
+  cos: {
+    cosl1: Number, cosl2: Number, cosl3: Number
+  },
   createdAt: { type: Date, default: Date.now, index: true }
 });
+
 const Reading = mongoose.model('Reading', readingSchema);
 
 // 3) Start HTTP + WebSocket server
@@ -103,11 +82,7 @@ if (isDev) {
   setInterval(async () => {
     try {
       await Reading.create({
-        voltageLN: {
-          v1: +(Math.random() * 100).toFixed(2),
-          v2: +(Math.random() * 100).toFixed(2),
-          v3: +(Math.random() * 100).toFixed(2),
-        },
+        voltageLN: { v1: +(Math.random() * 100).toFixed(2), v2: +(Math.random() * 100).toFixed(2), v3: +(Math.random() * 100).toFixed(2),},
         voltageLL: {
           v12: +(Math.random() * 120).toFixed(2),
           v23: +(Math.random() * 120).toFixed(2),
