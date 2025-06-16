@@ -79,7 +79,6 @@ io.on('connection', socket => {
 
 // }, 1000);
 
-if (isDev) {
   setInterval(async () => {
     try {
       await Reading.create({
@@ -124,7 +123,6 @@ if (isDev) {
       console.error('❌ Seeder error:', e);
     }
   }, 1000);
-}
 
 
 // 5) ChangeStream with auto-restart
