@@ -21,9 +21,52 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // 2) Define Reading model
 const readingSchema = new mongoose.Schema({
-  voltage:   Number,
-  current:   Number,
-  frequency: Number,
+ voltageLN:{
+  v1:Number,
+  v2:Number,
+  v3:Number
+
+ },
+ voltageLL : {
+  V12:Number,
+  V23:Number,
+  v31:Number
+ },
+ current : {
+  i1:Number,
+  i2:Number,
+   i3:Number
+ },
+ frequency : {
+  f1:Number,
+  V2:Number,
+  f3:Number
+ },
+  frequency : {
+  f1:Number,
+  V2:Number,
+  f3:Number
+ },
+ activePower:{
+  PL1:Number,
+  PL2:Number,
+  PL3:Number,
+ },
+ reactivePower:{
+  QL1:Number,
+  QL2:Number,
+  QL3:Number,
+ },
+ ApparentPower:{
+  SL1:Number,
+  SL2:Number,
+  SL3:Number,
+ },
+ cos:{
+  CosL1:Number,
+  CosL2:Number,
+  CosL3:Number,
+ },
   createdAt: { type: Date, default: Date.now, index: true }
 });
 const Reading = mongoose.model('Reading', readingSchema);
@@ -55,21 +98,59 @@ io.on('connection', socket => {
 //     console.error('❌ Seeder error:', e);
 //   }
 // }, 1000);
+
 if (isDev) {
   setInterval(async () => {
     try {
-      const fake = new Reading({
-        voltage:   +(Math.random() * 100).toFixed(2),
-        current:   +(Math.random() * 50).toFixed(2),
-        frequency: +(50 + Math.random() * 10).toFixed(2)
+      await Reading.create({
+        voltageLN: {
+          v1: +(Math.random() * 100).toFixed(2),
+          v2: +(Math.random() * 100).toFixed(2),
+          v3: +(Math.random() * 100).toFixed(2),
+        },
+        voltageLL: {
+          v12: +(Math.random() * 120).toFixed(2),
+          v23: +(Math.random() * 120).toFixed(2),
+          v31: +(Math.random() * 120).toFixed(2),
+        },
+        current: {
+          i1: +(Math.random() * 50).toFixed(2),
+          i2: +(Math.random() * 50).toFixed(2),
+          i3: +(Math.random() * 50).toFixed(2),
+        },
+        frequency: {
+          f1: +(50 + Math.random() * 10).toFixed(2),
+          f2: +(50 + Math.random() * 10).toFixed(2),
+          f3: +(50 + Math.random() * 10).toFixed(2),
+        },
+        activePower: {
+          PL1: +(Math.random() * 100).toFixed(2),
+          PL2: +(Math.random() * 100).toFixed(2),
+          PL3: +(Math.random() * 100).toFixed(2),
+        },
+        reactivePower: {
+          QL1: +(Math.random() * 100).toFixed(2),
+          QL2: +(Math.random() * 100).toFixed(2),
+          QL3: +(Math.random() * 100).toFixed(2),
+        },
+        apparentPower: {
+          SL1: +(Math.random() * 100).toFixed(2),
+          SL2: +(Math.random() * 100).toFixed(2),
+          SL3: +(Math.random() * 100).toFixed(2),
+        },
+        cos: {
+          CosL1: +(Math.random() * 1).toFixed(2),   // Cos values between 0.00–1.00
+          CosL2: +(Math.random() * 1).toFixed(2),
+          CosL3: +(Math.random() * 1).toFixed(2),
+        },
       });
-      await fake.save();
-      console.log('💾 Seeded fake reading:', fake);
     } catch (e) {
       console.error('❌ Seeder error:', e);
     }
   }, 1000);
 }
+
+
 // 5) ChangeStream with auto-restart
 function startChangeStream() {
   const stream = Reading.watch([{ $match: { operationType: 'insert' } }]);
