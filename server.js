@@ -7,9 +7,9 @@ const http     = require('http');
 const { Server } = require('socket.io');
 
 const app  = express();
-const port = process.env.PORT || 3000;
 
 app.use(express.json());
+const port = process.env.PORT;
 
 // 1) MongoDB connect
 mongoose.connect(process.env.MONGODB_URI)
@@ -115,6 +115,6 @@ app.get('/api/readings', async (req, res) => {
 });
 
 // 7) Launch server
-server.listen(port, () => {
-  console.log(`🚀 Server + WebSocket listening on http://localhost:${port}`);
+http.listen(port, () => {
+  console.log(`🚀 Server listening on port ${port}`);
 });
