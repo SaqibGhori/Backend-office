@@ -1,5 +1,6 @@
 // server.js
-require('dotenv').config();             // .env load kare
+require('dotenv').config();         
+const isDev = process.env.NODE_ENV !== 'production';
 const express  = require('express');
 const mongoose = require('mongoose');
 const http     = require('http');
@@ -41,20 +42,34 @@ io.on('connection', socket => {
 });
 
 // 4) Seeder: har second ek random reading DB mein insert karo
-setInterval(async () => {
-  try {
-    const fake = new Reading({
-      voltage:   +(Math.random() * 100).toFixed(2),
-      current:   +(Math.random() * 50).toFixed(2),
-      frequency: +(50 + Math.random() * 10).toFixed(2)
-    });
-    await fake.save();
-    console.log('💾 Seeded fake reading:', fake);
-  } catch (e) {
-    console.error('❌ Seeder error:', e);
-  }
-}, 1000);
-
+// setInterval(async () => {
+//   try {
+//     const fake = new Reading({
+//       voltage:   +(Math.random() * 100).toFixed(2),
+//       current:   +(Math.random() * 50).toFixed(2),
+//       frequency: +(50 + Math.random() * 10).toFixed(2)
+//     });
+//     await fake.save();
+//     console.log('💾 Seeded fake reading:', fake);
+//   } catch (e) {
+//     console.error('❌ Seeder error:', e);
+//   }
+// }, 1000);
+if (isDev) {
+  setInterval(async () => {
+    try {
+      const fake = new Reading({
+        voltage:   +(Math.random() * 100).toFixed(2),
+        current:   +(Math.random() * 50).toFixed(2),
+        frequency: +(50 + Math.random() * 10).toFixed(2)
+      });
+      await fake.save();
+      console.log('💾 Seeded fake reading:', fake);
+    } catch (e) {
+      console.error('❌ Seeder error:', e);
+    }
+  }, 1000);
+}
 // 5) ChangeStream with auto-restart
 function startChangeStream() {
   const stream = Reading.watch([{ $match: { operationType: 'insert' } }]);
