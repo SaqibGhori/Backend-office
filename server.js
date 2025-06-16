@@ -40,7 +40,7 @@ const readingSchema = new mongoose.Schema({
     ql1: Number, ql2: Number, ql3: Number
   },
   apparentPower: {
-    sl1: Number, sl2: Number, sl3: Number
+    sl1: Number, sl2: Number, sl3: Number  
   },
   cos: {
     cosl1: Number, cosl2: Number, cosl3: Number
@@ -76,6 +76,7 @@ io.on('connection', socket => {
 //   } catch (e) {
 //     console.error('❌ Seeder error:', e);
 //   }
+
 // }, 1000);
 
 if (isDev) {
