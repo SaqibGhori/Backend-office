@@ -115,6 +115,6 @@ app.get('/api/readings', async (req, res) => {
 });
 
 // 7) Launch server
-http.listen(port, () => {
-  console.log(`🚀 Server listening on port ${port}`);
+server.listen(port, () => {
+  console.log(`🚀 Server + WebSocket listening on http://localhost:${port}`);
 });
