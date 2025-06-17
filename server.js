@@ -80,26 +80,56 @@ io.on('connection', socket => {
 // }, 1000);
 
 
- // 4) Seeder: har second ek random reading DB mein insert karo
-console.log('🔧 Seeder active (dev+prod)');
+ // 4) Seeder: har second fake data DB me dala karo (DEV & PROD dono me)
 setInterval(async () => {
   try {
-    await Reading.create({
-      voltageLN:    { v1: +(Math.random()*100).toFixed(2), v2: +(Math.random()*100).toFixed(2), v3: +(Math.random()*100).toFixed(2) },
-      voltageLL:    { v12: +(Math.random()*120).toFixed(2), v23: +(Math.random()*120).toFixed(2), v31: +(Math.random()*120).toFixed(2) },
-      current:      { i1: +(Math.random()*50).toFixed(2),  i2: +(Math.random()*50).toFixed(2),  i3: +(Math.random()*50).toFixed(2) },
-      frequency:    { f1: +(50+Math.random()*10).toFixed(2), f2: +(50+Math.random()*10).toFixed(2), f3: +(50+Math.random()*10).toFixed(2) },
-      activePower:  { pl1: +(Math.random()*100).toFixed(2), pl2: +(Math.random()*100).toFixed(2), pl3: +(Math.random()*100).toFixed(2) },
-      reactivePower:{ ql1: +(Math.random()*100).toFixed(2), ql2: +(Math.random()*100).toFixed(2), ql3: +(Math.random()*100).toFixed(2) },
-      apparentPower:{ sl1: +(Math.random()*100).toFixed(2), sl2: +(Math.random()*100).toFixed(2), sl3: +(Math.random()*100).toFixed(2) },
-      cos:          { cosl1: +(Math.random()*1).toFixed(2), cosl2: +(Math.random()*1).toFixed(2), cosl3: +(Math.random()*1).toFixed(2) }
+    const fake = await Reading.create({
+      voltageLN: { 
+        v1: +(Math.random()*100).toFixed(2),
+        v2: +(Math.random()*100).toFixed(2),
+        v3: +(Math.random()*100).toFixed(2),
+      },
+      voltageLL: {
+        v12: +(Math.random()*120).toFixed(2),
+        v23: +(Math.random()*120).toFixed(2),
+        v31: +(Math.random()*120).toFixed(2),
+      },
+      current: {
+        i1: +(Math.random()*50).toFixed(2),
+        i2: +(Math.random()*50).toFixed(2),
+        i3: +(Math.random()*50).toFixed(2),
+      },
+      frequency: {
+        f1: +(50 + Math.random()*10).toFixed(2),
+        f2: +(50 + Math.random()*10).toFixed(2),
+        f3: +(50 + Math.random()*10).toFixed(2),
+      },
+      activePower: {
+        pl1: +(Math.random()*100).toFixed(2),
+        pl2: +(Math.random()*100).toFixed(2),
+        pl3: +(Math.random()*100).toFixed(2),
+      },
+      reactivePower: {
+        ql1: +(Math.random()*100).toFixed(2),
+        ql2: +(Math.random()*100).toFixed(2),
+        ql3: +(Math.random()*100).toFixed(2),
+      },
+      apparentPower: {
+        sl1: +(Math.random()*100).toFixed(2),
+        sl2: +(Math.random()*100).toFixed(2),
+        sl3: +(Math.random()*100).toFixed(2),
+      },
+      cos: {
+        cosl1: +(Math.random()*1).toFixed(2),
+        cosl2: +(Math.random()*1).toFixed(2),
+        cosl3: +(Math.random()*1).toFixed(2),
+      }
     });
-    console.log('💾 Seeded fake reading');
+    console.log('💾 Seeded fake reading:', fake);
   } catch (e) {
     console.error('❌ Seeder error:', e);
   }
 }, 1000);
-
 
 // 5) ChangeStream with auto-restart
 function startChangeStream() {
