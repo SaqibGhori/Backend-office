@@ -15,7 +15,7 @@ const port = process.env.PORT;
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => {
-    console.error('❌ Connection error:', err);
+    console.error('❌ Connection errorss:', err);
     process.exit(1);
   });
 
@@ -64,67 +64,57 @@ io.on('connection', socket => {
 });
 
 
-setInterval(async () => {
-  try {
-    const fake = new Reading({
-      voltage:   +(Math.random() * 100).toFixed(2),
-      current:   +(Math.random() * 50).toFixed(2),
-      frequency: +(50 + Math.random() * 10).toFixed(2)
-    });
-    await fake.save();
-    console.log('💾 Seeded fake reading:', fake);
-  } catch (e) {
-    console.error('❌ Seeder error:', e);
-  }
+// setInterval(async () => {
+//   try {
+//     const fake = new Reading({
+//       voltage:   +(Math.random() * 100).toFixed(2),
+//       current:   +(Math.random() * 50).toFixed(2),
+//       frequency: +(50 + Math.random() * 10).toFixed(2)
+//     });
+//     await fake.save();
+//     console.log('💾 Seeded fake reading:', fake);
+//   } catch (e) {
+//     console.error('❌ Seeder error:', e);
+//   }
 
-}, 1000);
-// if(process.env.NODE_ENV === 'development'){
-//   setInterval(async () => {
-//     try {
-//       await Reading.create({
-//         voltageLN: { v1: +(Math.random() * 100).toFixed(2), v2: +(Math.random() * 100).toFixed(2), v3: +(Math.random() * 100).toFixed(2),},
-//         voltageLL: {
-//           v12: +(Math.random() * 1).toFixed(2),
-//           v23: +(Math.random() * 120).toFixed(2),
-//           v31: +(Math.random() * 120).toFixed(2),
-//         },
-//         current: {
-//           i1: +(Math.random() * 50).toFixed(2),
-//           i2: +(Math.random() * 50).toFixed(2),
-//           i3: +(Math.random() * 50).toFixed(2),
-//         },
-//         frequency: {
-//           f1: +(50 + Math.random() * 10).toFixed(2),
-//           f2: +(50 + Math.random() * 10).toFixed(2),
-//           f3: +(50 + Math.random() * 10).toFixed(2),
-//         },
-//         activePower: {
-//           PL1: +(Math.random() * 100).toFixed(2),
-//           PL2: +(Math.random() * 100).toFixed(2),
-//           PL3: +(Math.random() * 100).toFixed(2),
-//         },
-//         reactivePower: {
-//           QL1: +(Math.random() * 100).toFixed(2),
-//           QL2: +(Math.random() * 100).toFixed(2),
-//           QL3: +(Math.random() * 100).toFixed(2),
-//         },
-//         apparentPower: {
-//           SL1: +(Math.random() * 100).toFixed(2),
-//           SL2: +(Math.random() * 100).toFixed(2),
-//           SL3: +(Math.random() * 100).toFixed(2),
-//         },
-//         cos: {
-//           CosL1: +(Math.random() * 1).toFixed(2),   // Cos values between 0.00–1.00
-//           CosL2: +(Math.random() * 1).toFixed(2),
-//           CosL3: +(Math.random() * 1).toFixed(2),
-//         },
-//       });
-//     } catch (e) {
-//       console.error('❌ Seeder error:', e);
-//     }
-//   }, 1000);
-// }
+// }, 1000);
 
+// 4) Seeder: only in development, not in production
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔧 Seeder active in development mode');
+  setInterval(async () => {
+    try {
+      await Reading.create({
+        voltageLN: { v1: +(Math.random()*100).toFixed(2),
+                     v2: +(Math.random()*100).toFixed(2),
+                     v3: +(Math.random()*100).toFixed(2) },
+        voltageLL: { v12: +(Math.random()*120).toFixed(2),
+                     v23: +(Math.random()*120).toFixed(2),
+                     v31: +(Math.random()*120).toFixed(2) },
+        current:   { i1: +(Math.random()*50).toFixed(2),
+                     i2: +(Math.random()*50).toFixed(2),
+                     i3: +(Math.random()*50).toFixed(2) },
+        frequency: { f1: +(50+Math.random()*10).toFixed(2),
+                     f2: +(50+Math.random()*10).toFixed(2),
+                     f3: +(50+Math.random()*10).toFixed(2) },
+        activePower:   { pl1: +(Math.random()*100).toFixed(2),
+                         pl2: +(Math.random()*100).toFixed(2),
+                         pl3: +(Math.random()*100).toFixed(2) },
+        reactivePower: { ql1: +(Math.random()*100).toFixed(2),
+                         ql2: +(Math.random()*100).toFixed(2),
+                         ql3: +(Math.random()*100).toFixed(2) },
+        apparentPower: { sl1: +(Math.random()*100).toFixed(2),
+                         sl2: +(Math.random()*100).toFixed(2),
+                         sl3: +(Math.random()*100).toFixed(2) },
+        cos:            { cosl1: +(Math.random()*1).toFixed(2),
+                         cosl2: +(Math.random()*1).toFixed(2),
+                         cosl3: +(Math.random()*1).toFixed(2) }
+      });
+    } catch (e) {
+      console.error('❌ Seeder error:', e);
+    }
+  }, 1000);
+}
 
 // 5) ChangeStream with auto-restart
 function startChangeStream() {
