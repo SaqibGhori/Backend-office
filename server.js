@@ -49,7 +49,6 @@ io.on('connection', socket => {
   console.log('✅ New client connected:', socket.id);
 });
 
-// 4) Seeder: sirf development mein hi chalana hai
 if (isDev) {
   console.log('🔧 Seeder active in development mode');
   setInterval(async () => {
