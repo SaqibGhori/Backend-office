@@ -1,15 +1,22 @@
 // server.js
 require('dotenv').config();
 const express  = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const http     = require('http');
 const { Server } = require('socket.io');
-
 const app  = express();
-app.use(express.json());
-
 const port = process.env.PORT || 3000;
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Enable CORS
+app.use(
+  cors({
+    origin: isDev ? 'http://localhost:5173' : 'https://your-production-domain.com',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  })
+);
 
 // 1) MongoDB connect
 //    Ensure your .env mein MONGODB_URI ki value bilkul is format mein ho:
@@ -106,6 +113,44 @@ app.post('/api/readings', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+// MongoDB Schema
+const readingSchemadynamic = new mongoose.Schema({
+  gatewayId: String,
+  timestamp: Date,
+  data: mongoose.Schema.Types.Mixed,
+});
+
+
+// Avoid redeclaration error (optional safety)
+const Readingdynamic = mongoose.models.Readingdynamic || mongoose.model('Readingdynamic', readingSchemadynamic);
+
+// API route
+// Existing API (enhance this!)
+app.get('/api/readingsdynamic', async (req, res) => {
+  try {
+    const { gatewayId, startDate, endDate } = req.query;
+    const filter = {};
+
+    if (gatewayId) {
+      filter.gatewayId = gatewayId;
+    }
+
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
+    }
+
+    const results = await Readingdynamic.find(filter).sort({ timestamp: -1 }).limit(100);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 
 // 7) Start server
 server.listen(port, () => {
