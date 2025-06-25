@@ -61,7 +61,7 @@ if (isDev) {
 
       // Construct data object
       const data = {
-        Voltage: {
+        'Voltage': {
           VL1: Math.floor(300 + Math.random() * 200),
           VL2: Math.floor(300 + Math.random() * 200),
           VL3: Math.floor(300 + Math.random() * 200),
