@@ -102,24 +102,32 @@ startChangeStream();
 // REST endpoints
 app.get('/api/readingsdynamic', async (req, res) => {
   try {
-    const { gatewayId, startDate, endDate } = req.query;
+    const { gatewayId, startDate, endDate, page = 1, limit = 50 } = req.query;
     const filter = {};
+
     if (gatewayId) filter.gatewayId = gatewayId;
     if (startDate || endDate) {
       filter.timestamp = {};
       if (startDate) filter.timestamp.$gte = startDate;
       if (endDate) filter.timestamp.$lte = endDate;
     }
+
+    const skip = (Number(page) - 1) * Number(limit);
     const results = await ReadingDynamic.find(filter)
       .sort({ timestamp: -1 })
-      .limit(100)
+      .skip(skip)
+      .limit(Number(limit))
       .lean();
-    return res.json(results);
+
+    const totalCount = await ReadingDynamic.countDocuments(filter);
+
+    return res.json({ data: results, total: totalCount });
   } catch (err) {
     console.error('❌ Error in /api/readingsdynamic:', err);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 app.get('/api/gateways', async (req, res) => {
   try {
     const gateways = await ReadingDynamic.distinct('gatewayId');
