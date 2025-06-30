@@ -3,8 +3,10 @@ const ReadingDynamic = require('../src/models/ReadingDynamic');
 
 module.exports = function initSocket(server, origin) {
   const io = new Server(server, {
-    cors: { origin, methods: ['GET','POST'] }
-  });
+    cors: { origin, methods: ['GET','POST'] },
+    transports: ['websocket'],   // ← disable polling
+    path: '/socket.io',
+  })
 
   io.on('connection', socket => {
     console.log('✅ New client connected:', socket.id);
