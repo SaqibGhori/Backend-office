@@ -1,25 +1,21 @@
-const service = require('../services/readingService');
+const ReadingDynamic = require('../models/ReadingDynamic');
 
-exports.listGateways = async (req, res, next) => {
-  try {
-    const data = await service.listGateways();
-    res.json(data);
-  } catch (err) {
-    next(err);
-  }
+exports.listGateways = async (req, res) => {
+  const list = await ReadingDynamic.distinct('gatewayId');
+  res.json(list);
 };
 
-exports.getReadings = async (req, res, next) => {
-  try {
-    const { data, total } = await service.getReadings({
-      gatewayId: req.query.gatewayId,
-      startDate: req.query.startDate,
-      endDate: req.query.endDate,
-      page:  Number(req.query.page)  || 1,
-      limit: Number(req.query.limit) || 50,
-    });
-    res.json({ data, total });
-  } catch (err) {
-    next(err);
+exports.getReadings = async (req, res) => {
+  const { gatewayId, startDate, endDate, page=1, limit=50 } = req.query;
+  const filter = {};
+  if (gatewayId) filter.gatewayId = gatewayId;
+  if (startDate||endDate) {
+    filter.timestamp = {};
+    if (startDate) filter.timestamp.$gte = startDate;
+    if (endDate)   filter.timestamp.$lte = endDate;
   }
+  const skip = (page-1)*limit;
+  const data = await ReadingDynamic.find(filter).sort({timestamp:-1}).skip(skip).limit(Number(limit)).lean();
+  const total = await ReadingDynamic.countDocuments(filter);
+  res.json({ data, total });
 };
