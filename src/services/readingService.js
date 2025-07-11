@@ -1,4 +1,4 @@
-const Reading = require('../models/Reading');
+const Reading = require('../models/ReadingDynamic');
 
 exports.listGateways = () =>
   Reading.distinct('gatewayId');
