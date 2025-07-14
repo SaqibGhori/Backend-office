@@ -1,5 +1,6 @@
 // src/controllers/readingController.js
 const ReadingDynamic = require('../models/ReadingDynamic');
+const ReadingDynamicSchema = require('../models/LatestReadings')
 
 exports.listGateways = async (req, res) => {
   try {
