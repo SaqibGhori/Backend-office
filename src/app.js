@@ -15,6 +15,7 @@ app.use(cors({
   credentials: true,
   methods: ['GET','POST','PUT','DELETE'],
 }));
+
 app.use("/api", alarmRecordRoutes);
 app.use("/api", alarmRoutes);
 app.use('/api', readingRoutes);
