@@ -1,5 +1,5 @@
 // src/controllers/readingController.js
-
+const mongoose = require("mongoose");
 const ReadingDynamic = require('../models/ReadingDynamic');
 
 exports.listGateways = async (req, res) => {
@@ -49,22 +49,51 @@ exports.getReadings = async (req, res) => {
 
 exports.getLatestReadings = async (req, res) => {
   try {
-    const { gatewayId } = req.query;
-    if (!gatewayId) {
-      return res.status(400).json({ error: 'gatewayId is required' });
-    }
+    const db = mongoose.connection.db;
 
-    const latest = await ReadingDynamic.aggregate([
-      { $match: { gatewayId } },
-      { $addFields: { tsDate: { $toDate: '$timestamp' } } },
-      { $sort:    { tsDate: -1 } },
-      { $limit:   1 },
-      { $project: { tsDate: 0 } }
-    ]);
+    const pipeline = [
+      // Step 1: get latest timestamp per gateway
+      {
+        $group: {
+          _id: "$gatewayId",
+          latestTimestamp: { $max: "$timestamp" }
+        }
+      },
 
-    res.json(latest[0] || null);
-  } catch (err) {
-    console.error('getLatestReadings error', err);
-    res.status(500).json({ error: 'Server error' });
+      // Step 2: Join back to get full document
+      {
+        $lookup: {
+          from: "readingdynamics", // 👈 actual collection name
+          let: { gateway: "$_id", ts: "$latestTimestamp" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$gatewayId", "$$gateway"] },
+                    { $eq: ["$timestamp", "$$ts"] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "latestDoc"
+        }
+      },
+
+      // Step 3: Flatten
+      { $unwind: "$latestDoc" },
+      { $replaceRoot: { newRoot: "$latestDoc" } }
+    ];
+
+    const result = await db
+      .collection("readingdynamics") // ✅ double-check this name
+      .aggregate(pipeline, { allowDiskUse: true })
+      .toArray();
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("❌ Final Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
