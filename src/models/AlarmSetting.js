@@ -6,7 +6,7 @@ const AlarmSettingSchema = new mongoose.Schema({
   subcategory: { type: String, required: true },
   high:        { type: Number, default: 0 },
   low:         { type: Number, default: 0 },
-  priority:    { type: String, enum: ["High","Medium","Low"], default: "Medium" },
+  priority:    { type: String, enum: ["High","Normal","Low"], default: "Normal" },
   message:     { type: String, default: "" },  // naya field
 });
 

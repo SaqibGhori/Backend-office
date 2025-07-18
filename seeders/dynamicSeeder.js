@@ -35,7 +35,7 @@ setInterval(async () => {
     
   };
   const doc = await ReadingDynamic.create({ gatewayId, timestamp, data });
-  console.log('💾 Seeded dynamic reading:', doc);
+ console.log('💾 Seeded dynamic reading:', JSON.stringify(doc.toObject(), null, 2));
 } catch (e) {
   console.error('❌ Seeder error:', e);
 }

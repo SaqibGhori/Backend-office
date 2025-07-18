@@ -5,7 +5,7 @@ const AlarmRecordSchema = new mongoose.Schema({
   category:    { type: String, required: true },
   subcategory: { type: String, required: true },
   value:       { type: Number, required: true },
-  priority:    { type: String, enum: ["High","Medium","Low"], required: true },
+  priority:    { type: String, enum: ["High","Normal","Low"], required: true },
   message:     { type: String, default: "" },  // naya field
 });
 module.exports = mongoose.model("AlarmRecord", AlarmRecordSchema);

@@ -19,7 +19,7 @@ app.use(cors({
 app.use("/api", alarmRecordRoutes);
 app.use("/api", alarmRoutes);
 app.use('/api', readingRoutes);
-app.use("/api", alarmSettingsRoutes);
+app.use("/api", alarmSettingsRoutes); 
 app.use(errorHandler);
 
 module.exports = app;
