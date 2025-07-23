@@ -1,4 +1,3 @@
-// src/routes/readingRoutes.js
 const express = require('express');
 const { listGateways, getReadings, getLatestReadings  } = require('../controllers/readingController');
 const router = express.Router();

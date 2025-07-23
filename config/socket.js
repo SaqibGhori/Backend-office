@@ -13,7 +13,7 @@ module.exports = function initSocket(server, origin) {
   });
 
   io.on('connection', socket => {
-    console.log('✅ New client connected:', socket.id);
+    console.log('New client connected:', socket.id);
 
     socket.on('subscribe', gatewayId => {
       // leave any previous gateway rooms, then join the new one
@@ -21,29 +21,21 @@ module.exports = function initSocket(server, origin) {
         .filter(r => r.startsWith('gateway-'))
         .forEach(r => socket.leave(r));
       socket.join(gatewayId);
-      console.log(`🔔 ${socket.id} subscribed to ${gatewayId}`);
+      console.log(`${socket.id} subscribed to ${gatewayId}`);
     });
   });
 
-  // 2️⃣ Start MongoDB ChangeStream
   function startStream() {
     const stream = ReadingDynamic.watch([{ $match: { operationType: 'insert' } }]);
 
     stream.on('change', async ({ fullDocument }) => {
       try {
-        const { gatewayId } = fullDocument;
-
-        // ─── Ensure a default alias record exists ─────────────────
-        await GatewayMeta.updateOne(
-          { gatewayId },
-          { $setOnInsert: { displayName: gatewayId } },
-          { upsert: true }
-        );
-
-        // ─── Broadcast new reading to all clients ─────────────────
+        // 1. Broadcast new reading to all
         io.emit('new-reading', fullDocument);
 
-        // ─── Alarm detection logic ────────────────────────────────
+        // 2. Alarm detection logic
+        const reading = fullDocument;
+        const { gatewayId, timestamp, data } = reading;
         const settings = await AlarmSetting.find({ gatewayId });
         const alarms = [];
 
@@ -70,14 +62,18 @@ module.exports = function initSocket(server, origin) {
         if (alarms.length > 0) {
           await AlarmRecord.insertMany(alarms);
           io.to(gatewayId).emit('new-alarms', alarms);
-        }
+
+          alarms.forEach(alarm => {
+            io.emit('global-alarms', alarm);
+          });
+        }     
       } catch (err) {
-        console.error('🔥 Stream processing error:', err);
+        console.error('Stream processing error:', err);
       }
     });
 
     stream.on('error', err => {
-      console.error('⚠️ ChangeStream error:', err);
+      console.error('ChangeStream error:', err);
       stream.close();
       setTimeout(startStream, 5000);
     });
