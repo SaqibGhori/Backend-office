@@ -11,27 +11,24 @@ module.exports = function initSocket(server, origin) {
   });
 
   io.on('connection', socket => {
-    console.log('✅ New client connected:', socket.id);
+    console.log('New client connected:', socket.id);
 
     socket.on('subscribe', gatewayId => {
       Array.from(socket.rooms)
         .filter(r => r.startsWith('gateway-'))
         .forEach(r => socket.leave(r));
       socket.join(gatewayId);
-      console.log(`🔔 ${socket.id} subscribed to ${gatewayId}`);
+      console.log(`${socket.id} subscribed to ${gatewayId}`);
     });
   });
 
-  // Start MongoDB stream
   function startStream() {
     const stream = ReadingDynamic.watch([{ $match: { operationType: 'insert' } }]);
 
     stream.on('change', async ({ fullDocument }) => {
       try {
-        // 1. Broadcast new reading to all
         io.emit('new-reading', fullDocument);
 
-        // 2. Alarm detection logic
         const reading = fullDocument;
         const { gatewayId, timestamp, data } = reading;
         const settings = await AlarmSetting.find({ gatewayId });
@@ -60,14 +57,18 @@ module.exports = function initSocket(server, origin) {
         if (alarms.length > 0) {
           await AlarmRecord.insertMany(alarms);
           io.to(gatewayId).emit('new-alarms', alarms);
-        }
+
+          alarms.forEach(alarm => {
+            io.emit('global-alarms', alarm);
+          });
+        }     
       } catch (err) {
-        console.error('🔥 Stream processing error:', err);
+        console.error('Stream processing error:', err);
       }
     });
 
     stream.on('error', err => {
-      console.error('⚠️ ChangeStream error:', err);
+      console.error('ChangeStream error:', err);
       stream.close();
       setTimeout(startStream, 5000);
     });

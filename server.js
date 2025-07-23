@@ -8,7 +8,7 @@ const port = process.env.PORT||3000;
 const server = http.createServer(app);
 
 connectDB(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .then(() => console.log('Connected to MongoDB Atlas'))
   .then(() => {
     if (process.env.NODE_ENV!=='production') {
       require('./seeders/dynamicSeeder');
@@ -17,6 +17,6 @@ connectDB(process.env.MONGODB_URI)
     server.listen(port, ()=>console.log(`🚀 Server listening on ${port}`));
   })
   .catch(err=>{
-    console.error('❌ DB error:', err);
+    console.error('DB error:', err);
     process.exit(1);
   });
