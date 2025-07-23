@@ -24,6 +24,6 @@ app.use("/api", alarmRoutes);
 app.use('/api', readingRoutes);
 app.use("/api", alarmSettingsRoutes); 
 app.use(errorHandler);
-app.use("/api/gateways-meta", gatewayRoutes);
+// app.use("/api/gateways-meta", gatewayRoutes);
 
 module.exports = app;
