@@ -1,30 +1,47 @@
-const express = require('express');
-const cors = require('cors');
-const alarmRecordRoutes = require("./routes/AlarmRecordRoutes");
-const alarmSettingsRoutes = require("./routes/AlarmsSettingsRoutes");
-const readingRoutes = require('./routes/readingRoutes');
-const errorHandler = require('./utils/errorHandler');
+require('dotenv').config();
+const express               = require('express');
+const cors                  = require('cors');
+const ingestRoutes          = require('./routes/ingestRoutes');
+const authRoutes            = require('./routes/authRoutes');
+const readingRoutes         = require('./routes/readingRoutes');
+const alarmSettingsRoutes   = require('./routes/AlarmsSettingsRoutes');
+const alarmRecordRoutes     = require('./routes/AlarmRecordRoutes');
+const { authMiddleware,
+        checkRole }         = require('./middleware/auth');
+const errorHandler          = require('./utils/errorHandler');
 
 const app = express();
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV  !== 'production';
 
-const alarmSettingsRoutes = require("./routes/AlarmsSettingsRoutes");
-const gatewayRoutes = require('./routes/gatewayRoutes');
-
+// Body parser & CORS
 app.use(express.json());
 app.use(cors({
-  origin: isDev ? 'http://localhost:5173' : 'https://your-production-domain.com',
+  origin: isDev
+    ? 'http://localhost:5173'
+    : 'https://your-production-domain.com',
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE'],
-  // methods: ['GET','POST','PUT','DELETE'],
-  methods: ['GET','POST','PUT','PATCH','DELETE'],   // ← PATCH add karo
-
 }));
 
-app.use("/api", alarmRecordRoutes);
-app.use("/api", alarmSettingsRoutes); 
+// 1️⃣ Public ingestion—devices always allowed
+app.use('/api/ingest', ingestRoutes);
+
+// 2️⃣ Public auth—register & login
+app.use('/api/auth', authRoutes);
+
+// 3️⃣ Public data reads—gateways & readings (no JWT required)
 app.use('/api', readingRoutes);
+
+app.use(
+  '/api/settings',
+  alarmSettingsRoutes
+);
+
+app.use(
+  '/api',alarmRecordRoutes
+);
+
+// 6️⃣ Error handler (always last)
 app.use(errorHandler);
-// app.use("/api/gateways-meta", gatewayRoutes);
 
 module.exports = app;
