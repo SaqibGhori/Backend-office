@@ -8,15 +8,11 @@ const errorHandler = require('./utils/errorHandler');
 const app = express();
 const isDev = process.env.NODE_ENV !== 'production';
 
-const alarmSettingsRoutes = require("./routes/AlarmsSettingsRoutes");
-const gatewayRoutes = require('./routes/gatewayRoutes');
 
 app.use(express.json());
 app.use(cors({
   origin: isDev ? 'http://localhost:5173' : 'https://your-production-domain.com',
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE'],
-  // methods: ['GET','POST','PUT','DELETE'],
   methods: ['GET','POST','PUT','PATCH','DELETE'],   // ← PATCH add karo
 
 }));

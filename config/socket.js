@@ -2,7 +2,6 @@ const { Server } = require('socket.io');
 const ReadingDynamic = require('../src/models/ReadingDynamic');
 const AlarmSetting   = require('../src/models/AlarmSetting');
 const AlarmRecord    = require('../src/models/AlarmRecord');
-const GatewayMeta    = require('../src/models/GatewayMeta');
 
 module.exports = function initSocket(server, origin) {
   // 1️⃣ Initialize Socket.IO
