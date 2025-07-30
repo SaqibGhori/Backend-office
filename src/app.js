@@ -23,6 +23,12 @@ app.use(cors({
   methods: ['GET','POST','PUT','PATCH','DELETE'],
 }));
 
+
+app.use(
+  '/superadmin/auth',
+  superadminAuth
+);
+
 // 1️⃣ Public ingestion—devices always allowed
 app.use('/api/ingest', ingestRoutes);
 

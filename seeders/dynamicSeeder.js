@@ -1,8 +1,34 @@
+// dynamicSeeder.js
+require('dotenv').config();              // ① load your .env early
+const User           = require('../src/models/User');
 const ReadingDynamic = require('../src/models/ReadingDynamic');
-const gateways = ['gateway-001', 'gateway-002', 'gateway-003'];
+
+// ─── 1️⃣ Superadmin seeder (runs once at startup) ─────────────────
+;(async () => {
+  try {
+    const exists = await User.countDocuments({ role: 'superadmin' });
+    if (exists === 0) {
+      await User.create({
+        name:     process.env.SUPERADMIN_NAME,
+        email:    process.env.SUPERADMIN_EMAIL,
+        password: process.env.SUPERADMIN_PASSWORD,
+        role:     'superadmin',
+        isActive: true
+      });
+      console.log('🌱 Superadmin seeded:', process.env.SUPERADMIN_EMAIL);
+    } else {
+      console.log('✅ Superadmin already exists, skipping seed');
+    }
+  } catch (err) {
+    console.error('❌ Superadmin seeder error:', err);
+  }
+})();
+
+// ─── 2️⃣ Reading seeder (runs repeatedly on an interval) ─────────
+const gateways   = ['gateway-001', 'gateway-002', 'gateway-003'];
 const intervalMs = Number(process.env.SEED_INTERVAL_MS) || 1000;
 
-console.log('🔧 Seeder active, interval:', intervalMs);
+console.log('🔧 ReadingSeeder active, interval:', intervalMs, 'ms');
 
 setInterval(async () => {
   try {
@@ -24,7 +50,7 @@ setInterval(async () => {
         PF2: Math.floor(Math.random() * 100),
         PF3: Math.floor(Math.random() * 100),
       },
-       Temperature: {
+      Temperature: {
         T1: Math.floor(Math.random() * 100),
         T2: Math.floor(Math.random() * 100),
       },
@@ -32,11 +58,11 @@ setInterval(async () => {
         H1: Math.floor(Math.random() * 100),
         H2: Math.floor(Math.random() * 100),
       },
-    
-  };
-  const doc = await ReadingDynamic.create({ gatewayId, timestamp, data });
- console.log('💾 Seeded dynamic reading:', JSON.stringify(doc.toObject(), null, 2));
-} catch (e) {
-  console.error('❌ Seeder error:', e);
-}
+    };
+
+    const doc = await ReadingDynamic.create({ gatewayId, timestamp, data });
+    console.log('💾 Seeded dynamic reading:', JSON.stringify(doc.toObject(), null, 2));
+  } catch (e) {
+    console.error('❌ Seeder error:', e);
+  }
 }, intervalMs);
