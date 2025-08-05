@@ -10,7 +10,7 @@ router.post(
   [
     body('name').notEmpty(),
     body('email').isEmail(),
-    body('password').isLength({ min: 6 })
+    body('password').isLength({ min: 6 }).withMessage('Password min 6 chars')
   ],
   register
 );
