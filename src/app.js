@@ -6,6 +6,7 @@ const authRoutes            = require('./routes/authRoutes');
 const readingRoutes         = require('./routes/readingRoutes');
 const alarmSettingsRoutes   = require('./routes/AlarmsSettingsRoutes');
 const alarmRecordRoutes     = require('./routes/AlarmRecordRoutes');
+const gatewayRoutes     = require('./routes/gatewayRoutes');
 const { authMiddleware,
         checkRole }         = require('./middleware/auth');
 const errorHandler          = require('./utils/errorHandler');
@@ -29,11 +30,15 @@ app.use('/api/ingest', ingestRoutes);
 // 2️⃣ Public auth—register & login
 app.use('/api/auth', authRoutes);
 
+app.use('/api/gateway', gatewayRoutes);
+
+
+
 // 3️⃣ Public data reads—gateways & readings (no JWT required)
 app.use('/api', readingRoutes);
 
 app.use(
-  '/api/settings',
+  '/api/alarm-settings',
   alarmSettingsRoutes
 );
 

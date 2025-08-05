@@ -1,13 +1,19 @@
 const ReadingDynamic = require('../src/models/ReadingDynamic');
-const gateways = ['gateway-001', 'gateway-002', 'gateway-003'];
+const Gateway = require('../src/models/Gateway');
 const intervalMs = Number(process.env.SEED_INTERVAL_MS) || 1000;
-
 console.log('🔧 Seeder active, interval:', intervalMs);
 
 setInterval(async () => {
   try {
-    const gatewayId = gateways[Math.floor(Math.random() * gateways.length)];
+    const allGateways = await Gateway.find({});
+    if (!allGateways.length) return;
+
+    // Random gateway pick
+    const randomGateway = allGateways[Math.floor(Math.random() * allGateways.length)];
+    const gatewayId = randomGateway.gatewayId;
+    const userId = randomGateway.user;
     const timestamp = new Date().toISOString();
+
     const data = {
       Voltage: {
         VL1: Math.floor(Math.random() * 100),
@@ -24,19 +30,27 @@ setInterval(async () => {
         PF2: Math.floor(Math.random() * 100),
         PF3: Math.floor(Math.random() * 100),
       },
-       Temperature: {
+      Temperature: {
         T1: Math.floor(Math.random() * 100),
         T2: Math.floor(Math.random() * 100),
+        T3: Math.floor(Math.random() * 100),
       },
       Humidity: {
         H1: Math.floor(Math.random() * 100),
         H2: Math.floor(Math.random() * 100),
-      },
-    
-  };
-  const doc = await ReadingDynamic.create({ gatewayId, timestamp, data });
- console.log('💾 Seeded dynamic reading:', JSON.stringify(doc.toObject(), null, 2));
-} catch (e) {
-  console.error('❌ Seeder error:', e);
-}
+        H3: Math.floor(Math.random() * 100),
+      }
+    };
+
+    await ReadingDynamic.create({
+      gatewayId,
+      userId,
+      timestamp,
+      data
+    });
+
+console.log("🔁 Seeding for:", { gatewayId, userId, timestamp ,data });
+  } catch (err) {
+    console.error('Seeder Error:', err.message);
+  }
 }, intervalMs);

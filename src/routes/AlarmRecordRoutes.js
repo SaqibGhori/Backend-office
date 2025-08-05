@@ -1,7 +1,8 @@
 const express = require("express");
 const { getAlarmCountsPerGateway , getAlarmRecords , postAlarmRecords , alarmRecordsExport , alarmGenerate } = require("../controllers/AlarmRecordsController")
 const router = express.Router();
-
+const { authMiddleware } = require('../middleware/auth');
+router.use(authMiddleware);
 router.get("/alarm-counts", getAlarmCountsPerGateway);
 router.get("/alarm-records", getAlarmRecords);
 router.post("/alarm-records", postAlarmRecords);
