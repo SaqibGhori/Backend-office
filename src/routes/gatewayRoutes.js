@@ -10,9 +10,9 @@ const {
 router.use(authMiddleware);
 
 // POST /api/gateways
-router.post('/gateways', createGateway);
+router.post('/', createGateway);
 
 // GET  /api/gateways
-router.get('/gateways', getUserGateways);
+router.get('/', getUserGateways);
 
 module.exports = router;

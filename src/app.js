@@ -6,12 +6,15 @@ const authRoutes            = require('./routes/authRoutes');
 const readingRoutes         = require('./routes/readingRoutes');
 const alarmSettingsRoutes   = require('./routes/AlarmsSettingsRoutes');
 const alarmRecordRoutes     = require('./routes/AlarmRecordRoutes');
+const gatewayRoutes     = require('./routes/gatewayRoutes');
 const { authMiddleware,
         checkRole }         = require('./middleware/auth');
 const errorHandler          = require('./utils/errorHandler');
 const superadminAuth = require('./routes/superadminAuth')
 const app = express();
 const isDev = process.env.NODE_ENV  !== 'production';
+const passport = require('./auth/google');
+
 
 // Body parser & CORS
 app.use(express.json());
@@ -29,17 +32,23 @@ app.use(
   superadminAuth
 );
 
+app.use(passport.initialize());
+
 // 1️⃣ Public ingestion—devices always allowed
 app.use('/api/ingest', ingestRoutes);
 
 // 2️⃣ Public auth—register & login
 app.use('/api/auth', authRoutes);
 
+app.use('/api/gateway', gatewayRoutes);
+
+
+
 // 3️⃣ Public data reads—gateways & readings (no JWT required)
 app.use('/api', readingRoutes);
 
 app.use(
-  '/api/settings',
+  '/api/alarm-settings',
   alarmSettingsRoutes
 );
 

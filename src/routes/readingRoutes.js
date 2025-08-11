@@ -1,10 +1,23 @@
 const express = require('express');
-const { listGateways, getReadings, getLatestReadings  } = require('../controllers/readingController');
 const router = express.Router();
+const {
+  listGateways,
+  getReadings,
+  getLatestReadings,
+} = require('../controllers/readingController');
 
+const { authMiddleware } = require('../middleware/auth');
+
+// 🔐 Secure all routes below with JWT auth
+router.use(authMiddleware);
+
+// ✅ GET /api/gateways — now user-specific
 router.get('/gateways', listGateways);
-router.get('/readingsdynamic', getReadings);
-router.get("/latest-readings", getLatestReadings);
 
+// ✅ GET /api/readingsdynamic?gatewayId=xxx
+router.get('/readingsdynamic', getReadings);
+
+// ✅ GET /api/latest-readings
+router.get('/latest-readings', getLatestReadings);
 
 module.exports = router;

@@ -33,7 +33,7 @@ exports.getUserGateways = async (req, res, next) => {
     const gateways = await Gateway.find({ user: req.user.userId })
       .sort({ createdAt: -1 });
 
-    res.json(gateways);
+    res.json(gateways); 
   } catch (err) {
     next(err);
   }
