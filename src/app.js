@@ -11,7 +11,6 @@ const superadminAuth = require('./routes/superadminAuth')
 const { authMiddleware,
         checkRole }         = require('./middleware/auth');
 const errorHandler          = require('./utils/errorHandler');
-const superadminAuth = require('./routes/superadminAuth')
 const app = express();
 const isDev = process.env.NODE_ENV  !== 'production';
 const passport = require('./auth/google');
