@@ -17,7 +17,7 @@ exports.register = async (req, res, next) => {
     const user = new User({ name, email, role });
     user.password = password;            // ← set virtual
     await user.save();                   // ← pre‑save hook runs here
-    res.status(201).json({ msg: 'Registered! You can now log in.' });
+    res.status(200).json({ msg: 'Registered! You can now log in.' });
   } catch (err) {
     next(err);
   }

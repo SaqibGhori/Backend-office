@@ -1,3 +1,6 @@
+// dynamicSeeder.js
+require('dotenv').config();              // ① load your .env early
+const User           = require('../src/models/User');
 const ReadingDynamic = require('../src/models/ReadingDynamic');
 const Gateway = require('../src/models/Gateway');
 const intervalMs = Number(process.env.SEED_INTERVAL_MS) || 1000;

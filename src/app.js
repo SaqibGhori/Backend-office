@@ -7,6 +7,7 @@ const readingRoutes         = require('./routes/readingRoutes');
 const alarmSettingsRoutes   = require('./routes/AlarmsSettingsRoutes');
 const alarmRecordRoutes     = require('./routes/AlarmRecordRoutes');
 const gatewayRoutes     = require('./routes/gatewayRoutes');
+const superadminAuth = require('./routes/superadminAuth')
 const { authMiddleware,
         checkRole }         = require('./middleware/auth');
 const errorHandler          = require('./utils/errorHandler');
@@ -15,7 +16,7 @@ const app = express();
 const isDev = process.env.NODE_ENV  !== 'production';
 
 // Body parser & CORS
-app.use(express.json());
+app.use(express.json());  
 app.use(cors({
   origin: isDev
     ? 'http://localhost:5173'
@@ -23,6 +24,12 @@ app.use(cors({
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE'],
 }));
+
+
+app.use(
+  '/superadmin/auth',
+  superadminAuth
+);
 
 // 1️⃣ Public ingestion—devices always allowed
 app.use('/api/ingest', ingestRoutes);
