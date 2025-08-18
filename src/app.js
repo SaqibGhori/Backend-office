@@ -52,6 +52,10 @@ app.use(
   alarmSettingsRoutes
 );
 
+app.get('/health', (req, res) => {
+  res.json({ ok: true, message: 'WattMatrix API is running' });
+});
+
 app.use(
   '/api',alarmRecordRoutes
 );
