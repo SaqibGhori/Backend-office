@@ -16,76 +16,63 @@ const { authMiddleware, checkRole } = require('./middleware/auth');
 const errorHandler        = require('./utils/errorHandler');
 const passport            = require('./auth/google');
 
-const app   = express();
+const app  = express();
 const isDev = process.env.NODE_ENV !== 'production';
 
-/* -------------------------------------------------------------------------- */
-/* Health endpoints (public)                                                  */
-/* -------------------------------------------------------------------------- */
-app.get('/health', (_req, res) => res.json({ ok: true, message: 'WattMatrix API is running' }));
+/* -------------------------- PUBLIC HEALTH ENDPOINTS ------------------------- */
+/* Put these BEFORE any routers/middleware so they stay open (no auth) */
+app.get('/health', (_req, res) =>
+  res.json({ ok: true, message: 'WattMatrix API is running' })
+);
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-/* -------------------------------------------------------------------------- */
-/* Core middleware                                                            */
-/* -------------------------------------------------------------------------- */
-app.set('trust proxy', 1);           // required behind Render/HTTPS proxies
-app.use(express.json());             // JSON parsing
+/* ------------------------------ CORE MIDDLEWARE ----------------------------- */
+app.set('trust proxy', 1); // needed behind Render/HTTPS proxy
+app.use(express.json());
 
-// ----- Build allowed origins from env (supports wildcards) ------------------
-const fromEnv = (process.env.CORS_ORIGIN || '')
+// Build allowed origins from env; fall back to sensible defaults.
+const corsFromEnv = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
 
-const defaultProd = ['https://wattmatrix.io', 'https://www.wattmatrix.io'];
-const defaultDev  = ['http://localhost:5173'];
+const allowedOrigins = corsFromEnv.length
+  ? corsFromEnv
+  : (isDev
+      ? ['http://localhost:5173']
+      : ['https://wattmatrix.io', 'https://www.wattmatrix.io']);
 
-const allowList = fromEnv.length ? fromEnv : (isDev ? defaultDev : defaultProd);
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  })
+);
 
-// wildcard matcher: supports patterns like https://*.vercel.app
-const matches = (origin, pattern) => {
-  if (pattern.includes('*')) {
-    const re = new RegExp('^' + pattern
-      .replace(/\./g, '\\.')
-      .replace('*', '.*') + '$');
-    return re.test(origin);
-  }
-  return origin === pattern;
-};
-
-// one reusable cors options object (used for normal + preflight)
-const corsOptions = {
-  origin(origin, cb) {
-    // allow same-origin/server-to-server/no-origin requests
-    if (!origin) return cb(null, true);
-    const ok = allowList.some(p => matches(origin, p));
-    return ok ? cb(null, true) : cb(new Error('Not allowed by CORS'));
-  },
-  credentials: true,  // keep true if you use cookies/sessions; false if you don't
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-app.use(cors(corsOptions));
-// handle CORS preflights explicitly
-app.options('*', cors(corsOptions));
-
-// Google OAuth (safe to init even if keys missing; your google.js should guard)
+// Passport (Google OAuth) – safe to init even if keys missing (see google.js guard)
 app.use(passport.initialize());
 
-/* -------------------------------------------------------------------------- */
-/* Public routes                                                              */
-/* -------------------------------------------------------------------------- */
-app.use('/api/ingest', ingestRoutes);         // device ingestion (public)
-app.use('/api/auth', authRoutes);             // auth (login/register/OAuth)
-app.use('/api/gateway', gatewayRoutes);       // gateway info (public)
-app.use('/api', readingRoutes);               // public reads (adjust inside)
+/* ------------------------------- PUBLIC ROUTES ------------------------------ */
+// Devices ingestion (public)
+app.use('/api/ingest', ingestRoutes);
+
+// Auth (login/register, OAuth)
+app.use('/api/auth', authRoutes);
+
+// Gateway listing/info (public unless your router protects inside)
+app.use('/api/gateway', gatewayRoutes);
+
+// Public reads (adjust inside router if some endpoints need auth)
+app.use('/api', readingRoutes);
+
+// Alarm settings (mounts as written; protect inside router if required)
 app.use('/api/alarm-settings', alarmSettingsRoutes);
+
+// Alarm records (same note as above)
 app.use('/api', alarmRecordRoutes);
 
-/* -------------------------------------------------------------------------- */
-/* Error handler (last)                                                       */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ ERROR HANDLER ------------------------------- */
 app.use(errorHandler);
 
 module.exports = app;
