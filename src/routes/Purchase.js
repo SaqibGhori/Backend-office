@@ -97,5 +97,15 @@ router.post(
   }
 );
 
+// GET /api/purchases/mine?limit=1&sort=createdAt:desc
+router.get('/mine', authMiddleware, async (req, res) => {
+  const { limit = 50, sort = 'createdAt:desc' } = req.query;
+  const [field, dir] = String(sort).split(':');
+  const items = await PlanPurchase.find({ user: req.user.userId })
+    .sort({ [field || 'createdAt']: dir === 'asc' ? 1 : -1 })
+    .limit(Math.min(Number(limit) || 50, 100))
+    .select('_id planName price duration devices status proofImageUrl createdAt');
+  res.json({ items });
+});
 
 module.exports = router;

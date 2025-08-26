@@ -17,7 +17,14 @@ const planPurchaseSchema = new Schema({
   proofImageUrl: { type: String },                      // optional: if you serve statically
 
   // approval flow (optional)
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+
+  // NEW:
+  approvedAt: Date,
+  expiresAt: Date,
+  rejectedAt: Date,
+  rejectReason: String,
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('PlanPurchase', planPurchaseSchema);

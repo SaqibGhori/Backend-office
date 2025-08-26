@@ -1,23 +1,24 @@
 require('dotenv').config();
-const express               = require('express');
-const cors                  = require('cors');
+const express = require('express');
+const cors = require('cors');
 const path = require('path');
 
-const ingestRoutes          = require('./routes/ingestRoutes');
-const authRoutes            = require('./routes/authRoutes');
-const readingRoutes         = require('./routes/readingRoutes');
-const alarmSettingsRoutes   = require('./routes/AlarmsSettingsRoutes');
-const alarmRecordRoutes     = require('./routes/AlarmRecordRoutes');
-const gatewayRoutes     = require('./routes/gatewayRoutes');
+const ingestRoutes = require('./routes/ingestRoutes');
+const authRoutes = require('./routes/authRoutes');
+const readingRoutes = require('./routes/readingRoutes');
+const alarmSettingsRoutes = require('./routes/AlarmsSettingsRoutes');
+const alarmRecordRoutes = require('./routes/AlarmRecordRoutes');
+const gatewayRoutes = require('./routes/gatewayRoutes');
 const purchasesRoute = require('./routes/Purchase');
 const superadminAuth = require('./routes/superadminAuth')
 const adminUsersRoute = require('./routes/AdminUsers');
+const meRoute = require('./routes/me');
 
 const { authMiddleware,
-        checkRole }         = require('./middleware/auth');
-const errorHandler          = require('./utils/errorHandler');
+  checkRole } = require('./middleware/auth');
+const errorHandler = require('./utils/errorHandler');
 const app = express();
-const isDev = process.env.NODE_ENV  !== 'production';
+const isDev = process.env.NODE_ENV !== 'production';
 const passport = require('./auth/google');
 
 // trust proxy (prod behind nginx etc.)
@@ -37,13 +38,13 @@ app.use(
   })
 );
 // Body parser & CORS
-app.use(express.json());  
+app.use(express.json());
 app.use(cors({
   origin: isDev
     ? 'http://localhost:5173'
     : 'https://wattmatrix.io',
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 }));
 
 
@@ -61,6 +62,8 @@ app.use(passport.initialize());
 
 // route
 app.use('/api/purchases', purchasesRoute);
+app.use('/api', meRoute);
+
 
 // 1️⃣ Public ingestion—devices always allowed
 app.use('/api/ingest', ingestRoutes);
@@ -81,7 +84,7 @@ app.use(
 );
 
 app.use(
-  '/api',alarmRecordRoutes
+  '/api', alarmRecordRoutes
 );
 
 // 6️⃣ Error handler (always last)
