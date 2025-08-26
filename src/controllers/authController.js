@@ -1,8 +1,8 @@
 // src/controllers/authController.js
 const { validationResult } = require('express-validator');
-const jwt     = require('jsonwebtoken');
-const bcrypt  = require('bcrypt');
-const User    = require('../models/User');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const User = require('../models/User');
 
 exports.register = async (req, res, next) => {
   const errors = validationResult(req);
@@ -39,7 +39,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ msg: 'Invalid credentials' });
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id.toString(), role: user.role, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
