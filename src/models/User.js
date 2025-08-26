@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
   provider: { type: String, enum: ['local', 'google'], default: 'local' },
 
   role:     { type: String, enum: ['user','admin','superadmin'], default: 'user' },
+  
+  // NEW: payment flag for normal users (defaults to false on signup)
+  payment:  { type: Boolean, default: false },
+  
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

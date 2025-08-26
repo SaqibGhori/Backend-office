@@ -1,60 +1,72 @@
 // app.js
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
-const ingestRoutes        = require('./routes/ingestRoutes');
-const authRoutes          = require('./routes/authRoutes');
-const readingRoutes       = require('./routes/readingRoutes');
+const ingestRoutes = require('./routes/ingestRoutes');
+const authRoutes = require('./routes/authRoutes');
+const readingRoutes = require('./routes/readingRoutes');
 const alarmSettingsRoutes = require('./routes/AlarmsSettingsRoutes');
-const alarmRecordRoutes   = require('./routes/AlarmRecordRoutes');
-const gatewayRoutes       = require('./routes/gatewayRoutes');
-const superadminAuth      = require('./routes/superadminAuth');
+const alarmRecordRoutes = require('./routes/AlarmRecordRoutes');
+const gatewayRoutes = require('./routes/gatewayRoutes');
+const purchasesRoute = require('./routes/Purchase');
+const superadminAuth = require('./routes/superadminAuth')
+const adminUsersRoute = require('./routes/AdminUsers');
+const meRoute = require('./routes/me');
 
-const { authMiddleware, checkRole } = require('./middleware/auth');
-const errorHandler        = require('./utils/errorHandler');
-const passport            = require('./auth/google');
-
-const app  = express();
+const { authMiddleware,
+  checkRole } = require('./middleware/auth');
+const errorHandler = require('./utils/errorHandler');
+const app = express();
 const isDev = process.env.NODE_ENV !== 'production';
+const passport = require('./auth/google');
 
-/* -------------------------- PUBLIC HEALTH ENDPOINTS ------------------------- */
-/* Put these BEFORE any routers/middleware so they stay open (no auth) */
-app.get('/health', (_req, res) =>
-  res.json({ ok: true, message: 'WattMatrix API is running' })
-);
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
+// trust proxy (prod behind nginx etc.)
+app.set('trust proxy', 1);
 
-/* ------------------------------ CORE MIDDLEWARE ----------------------------- */
-app.set('trust proxy', 1); // needed behind Render/HTTPS proxy
-app.use(express.json());
+// CORS (dev me FE alag port pe ho to bhi safe)
+app.use(cors({ origin: true, credentials: true }));
 
-// Build allowed origins from env; fall back to sensible defaults.
-const corsFromEnv = (process.env.CORS_ORIGIN || '')
-  .split(',')
-  .map(s => s.trim())
-  .filter(Boolean);
-
-const allowedOrigins = corsFromEnv.length
-  ? corsFromEnv
-  : (isDev
-      ? ['http://localhost:5173']
-      : ['https://wattmatrix.io', 'https://www.wattmatrix.io']);
-
+// ✅ Serve uploads from /uploads (src/uploads/*)
 app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res) => {
+      // cache ok for images; dev me farq nahi padega
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    },
   })
 );
+// Body parser & CORS
+app.use(express.json());
+app.use(cors({
+  origin: isDev
+    ? 'http://localhost:5173'
+    : 'https://wattmatrix.io',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+}));
 
-// Passport (Google OAuth) – safe to init even if keys missing (see google.js guard)
+
+app.use(
+  '/superadmin/auth',
+  superadminAuth
+);
+
+app.use('/api/admin', adminUsersRoute);
+
 app.use(passport.initialize());
 
-/* ------------------------------- PUBLIC ROUTES ------------------------------ */
-// Devices ingestion (public)
+// serve uploaded images
+// app.use('/uploads', express.static(path.join(__dirname, 'src', 'uploads')));
+
+// route
+app.use('/api/purchases', purchasesRoute);
+app.use('/api', meRoute);
+
+
+// 1️⃣ Public ingestion—devices always allowed
 app.use('/api/ingest', ingestRoutes);
 
 // Auth (login/register, OAuth)
@@ -69,8 +81,9 @@ app.use('/api', readingRoutes);
 // Alarm settings (mounts as written; protect inside router if required)
 app.use('/api/alarm-settings', alarmSettingsRoutes);
 
-// Alarm records (same note as above)
-app.use('/api', alarmRecordRoutes);
+app.use(
+  '/api', alarmRecordRoutes
+);
 
 /* ------------------------------ ERROR HANDLER ------------------------------- */
 app.use(errorHandler);
