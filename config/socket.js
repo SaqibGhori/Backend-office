@@ -5,14 +5,15 @@ const AlarmSetting   = require('../src/models/AlarmSetting');
 const AlarmRecord    = require('../src/models/AlarmRecord');
 
 module.exports = function initSocket(server, origin) {
+  const origins = (origin || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
   const io = new Server(server, {
-    cors: { origin, methods: ['GET', 'POST'] },
-    transports: ['websocket'],        // low-latency
-    perMessageDeflate: false,         // CPU save, lower lag
-    path: '/socket.io',
-    pingInterval: 10000,
-    pingTimeout: 25000,
-  });
+    cors: { origin: origins.length ? origins : '*', methods: ['GET','POST'], credentials: true },
+    transports: ['websocket', 'polling'],
+     path: '/socket.io',
+   });
 
   io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);

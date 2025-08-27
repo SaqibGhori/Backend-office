@@ -13,9 +13,12 @@ const server = http.createServer(app);
 connectDB(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB');
-    if (process.env.NODE_ENV !== 'production') {
-      require('./seeders/dynamicSeeder');
-    }
+ if (process.env.ENABLE_SEEDER === 'true') {
+   require('./seeders/dynamicSeeder');
+ }
+    // if (process.env.NODE_ENV !== 'production') {
+    //   require('./seeders/dynamicSeeder');
+    // }
 
     // Socket.IO init
     const io = initSocket(server, process.env.CORS_ORIGIN || '*');
