@@ -8,6 +8,49 @@ const { nanoid } = require('nanoid');
  * Enforces active plan + device limit.
  * Expects { name, location, gatewayId? } in req.body.
  */
+exports.updateGateway = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { name, location } = req.body;
+
+    if (!name && !location) {
+      return res.status(400).json({ message: "Nothing to update" });
+    }
+
+    const gateway = await Gateway.findOneAndUpdate(
+      { _id: id, user: req.user.userId },
+      {
+        ...(name ? { name: String(name).trim() } : {}),
+        ...(location ? { location: String(location).trim() } : {}),
+      },
+      { new: true }
+    );
+
+    if (!gateway) return res.status(404).json({ message: "Gateway not found" });
+    res.json(gateway);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ✅ Delete — only own gateway
+exports.deleteGateway = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    const deleted = await Gateway.findOneAndDelete({
+      _id: id,
+      user: req.user.userId,
+    });
+
+    if (!deleted) return res.status(404).json({ message: "Gateway not found" });
+
+    // NOTE: agar readings cascade delete chahiye to yahan handle karein.
+    return res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
 exports.createGateway = async (req, res, next) => {
   try {
     const { name, location } = req.body;
