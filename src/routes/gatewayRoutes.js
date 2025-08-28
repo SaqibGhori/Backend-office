@@ -3,16 +3,28 @@ const router = require('express').Router();
 const { authMiddleware } = require('../middleware/auth');
 const {
   createGateway,
-  getUserGateways
+  getUserGateways,
+  updateGateway,
+  deleteGateway,
 } = require('../controllers/gatewayController');
 
-// all /api/gateways/* routes require a valid JWT
+// Protect all routes
 router.use(authMiddleware);
 
-// POST /api/gateways
-router.post('/', createGateway);
-
-// GET  /api/gateways
+// List
 router.get('/', getUserGateways);
+
+// Create
+router.post('/', createGateway);
+router.patch('/:id', updateGateway);
+router.put('/:id', updateGateway);
+
+// ✅ delete
+router.delete('/:id', deleteGateway);
+// ✅ Update
+router.patch('/:id', updateGateway);
+
+// ✅ Delete
+router.delete('/:id', deleteGateway);
 
 module.exports = router;
