@@ -6,6 +6,7 @@ const AlarmRecordSchema = new mongoose.Schema({
       required: true,
     },
   gatewayId:   { type: String, required: true },
+  gatewayName: { type: String, required: true },
   timestamp:   { type: Date,   required: true },
   category:    { type: String, required: true },
   subcategory: { type: String, required: true },

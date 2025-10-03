@@ -20,7 +20,7 @@ exports.getAlarmSettings = async (req, res) => {
 
 exports.saveAlarmSettings = async (req, res) => {
   try {
-    const { gatewayId, settings } = req.body;
+    const { gatewayId, gatewayName , settings } = req.body;
     const userId = req.user.userId;
 
     if (!gatewayId || !Array.isArray(settings) || !userId) {
@@ -34,6 +34,7 @@ exports.saveAlarmSettings = async (req, res) => {
     const entries = settings.map(s => ({
       userId,
       gatewayId,
+      gatewayName,
       category: s.category,
       subcategory: s.subcategory,
       high: s.high,

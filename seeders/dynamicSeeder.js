@@ -14,6 +14,7 @@ setInterval(async () => {
     // Random gateway pick
     const randomGateway = allGateways[Math.floor(Math.random() * allGateways.length)];
     const gatewayId = randomGateway.gatewayId;
+    const gatewayName = randomGateway.gatewayName;
     const userId = randomGateway.user;
     const timestamp = new Date().toISOString();
 
@@ -48,11 +49,12 @@ setInterval(async () => {
     await ReadingDynamic.create({
       gatewayId,
       userId,
+      gatewayName,
       timestamp,
       data
     });
 
-console.log("🔁 Seeding for:", { gatewayId, userId, timestamp ,data });
+console.log("🔁 Seeding for:", { gatewayId, userId, gatewayName  });
   } catch (err) {
     console.error('Seeder Error:', err.message);
   }

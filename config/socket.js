@@ -1,8 +1,8 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const ReadingDynamic = require('../src/models/ReadingDynamic');
-const AlarmSetting   = require('../src/models/AlarmSetting');
-const AlarmRecord    = require('../src/models/AlarmRecord');
+const AlarmSetting = require('../src/models/AlarmSetting');
+const AlarmRecord = require('../src/models/AlarmRecord');
 
 module.exports = function initSocket(server, origin) {
   const origins = (origin || '')
@@ -10,10 +10,10 @@ module.exports = function initSocket(server, origin) {
     .map(o => o.trim())
     .filter(Boolean);
   const io = new Server(server, {
-    cors: { origin: origins.length ? origins : '*', methods: ['GET','POST'], credentials: true },
+    cors: { origin: origins.length ? origins : '*', methods: ['GET', 'POST'], credentials: true },
     transports: ['websocket', 'polling'],
-     path: '/socket.io',
-   });
+    path: '/socket.io',
+  });
 
   io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
@@ -100,11 +100,12 @@ module.exports = function initSocket(server, origin) {
     stream.on('change', async ({ fullDocument }) => {
       try {
         if (!fullDocument) return;
-        const { gatewayId, timestamp, data, userId } = fullDocument;
+        const { gatewayId, gatewayName, timestamp, data, userId } = fullDocument;
 
         // ✅ Room-scoped low-latency emit + consistent event name
         if (gatewayId) io.to(gatewayId).emit('reading', fullDocument);
-        if (userId)    io.to(`user-${userId}`).emit('reading', fullDocument);
+        if (userId) io.to(`user-${userId}`).emit('reading', fullDocument);
+    // console.log("New Reading:", fullDocument.gatewayName , fullDocument.gatewayId);
 
         // --- Alarm logic as-is (but roomed) ---
         const settings = await AlarmSetting.find({ gatewayId }).lean();
@@ -115,10 +116,11 @@ module.exports = function initSocket(server, origin) {
               const cfg = settings.find(s => s.category === cat && s.subcategory === sub);
               if (!cfg) continue;
               const isHigh = cfg.high !== undefined && val > cfg.high;
-              const isLow  = cfg.low  !== undefined && val < cfg.low;
+              const isLow = cfg.low !== undefined && val < cfg.low;
               if (isHigh || isLow) {
                 alarms.push({
                   gatewayId,
+                  gatewayName,
                   userId,
                   timestamp,
                   category: cat,
@@ -132,17 +134,17 @@ module.exports = function initSocket(server, origin) {
           if (alarms.length) {
             await AlarmRecord.insertMany(alarms, { ordered: false });
             if (gatewayId) io.to(gatewayId).emit('new-alarms', alarms);
-            if (userId)    io.to(`user-${userId}`).emit('global-alarms', alarms);
+            if (userId) io.to(`user-${userId}`).emit('global-alarms', alarms);
+            console.log(AlarmRecord, "moiz")
           }
         }
       } catch (err) {
         console.error('Stream processing error:', err);
       }
     });
-
     stream.on('error', err => {
       console.error('ChangeStream error:', err);
-      try { stream.close(); } catch {}
+      try { stream.close(); } catch { }
       setTimeout(startStream, 5000); // Retry after 5 sec
     });
   }

@@ -11,11 +11,7 @@ const gatewaySchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
+  gatewayName: { type: String, required: true },
   location: {
     type: String,
     required: true,

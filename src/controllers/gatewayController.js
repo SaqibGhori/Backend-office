@@ -11,16 +11,16 @@ const { nanoid } = require('nanoid');
 exports.updateGateway = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const { name, location } = req.body;
+    const { gatewayName, location } = req.body;
 
-    if (!name && !location) {
+    if (!gatewayName && !location) {
       return res.status(400).json({ message: "Nothing to update" });
     }
 
     const gateway = await Gateway.findOneAndUpdate(
       { _id: id, user: req.user.userId },
       {
-        ...(name ? { name: String(name).trim() } : {}),
+        ...(gatewayName ? { gatewayName: String(gatewayName).trim() } : {}),
         ...(location ? { location: String(location).trim() } : {}),
       },
       { new: true }
@@ -53,8 +53,8 @@ exports.deleteGateway = async (req, res, next) => {
 };
 exports.createGateway = async (req, res, next) => {
   try {
-    const { name, location } = req.body;
-    if (!name || !location) {
+    const { gatewayName, location } = req.body;
+    if (!gatewayName || !location) {
       return res.status(400).json({ message: 'Name and location are required' });
     }
 
@@ -104,7 +104,7 @@ exports.createGateway = async (req, res, next) => {
     const gateway = await Gateway.create({
       user: req.user.userId,
       gatewayId: req.body.gatewayId || nanoid(10),
-      name,
+      gatewayName,
       location,
     });
 

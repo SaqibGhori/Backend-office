@@ -7,6 +7,7 @@ const readingSchema = new mongoose.Schema({
   ref: 'User',
   required: true
 },
+  gatewayName:{type: String, required: true},
   timestamp: String,
   data: mongoose.Schema.Types.Mixed,
 });

@@ -7,6 +7,7 @@ const AlarmSettingSchema = new mongoose.Schema({
     required: true,
   },
   gatewayId: { type: String, required: true },
+  gatewayName:{type: String, required: true},
   category: { type: String, required: true },
   subcategory: { type: String, required: true },
   high: { type: Number, default: 0 },
