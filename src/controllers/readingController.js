@@ -4,7 +4,7 @@ const Gateway = require("../models/Gateway");
 
 exports.listGateways = async (req, res) => {
   try {
-    const gateways = await Gateway.find({ user: req.user.userId }).select("gatewayId name location");
+    const gateways = await Gateway.find({ user: req.user.userId }).select("gatewayId gatewayName location");
     res.json(gateways); // returns array of gateway objects
   } catch (err) {
     console.error("listGateways error", err);

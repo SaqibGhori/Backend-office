@@ -54,7 +54,7 @@ setInterval(async () => {
       data
     });
 
-console.log("🔁 Seeding for:", { gatewayId, userId, gatewayName  });
+console.log("🔁 Seeding for:", { gatewayId, userId, gatewayName  ,data });
   } catch (err) {
     console.error('Seeder Error:', err.message);
   }
