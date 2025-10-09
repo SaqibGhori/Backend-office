@@ -11,4 +11,5 @@ router.get('/me', authMiddleware, async (req, res) => {
   res.json({ user: u });
 });
 
+
 module.exports = router;
